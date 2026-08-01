@@ -1,0 +1,62 @@
+CAMPUS NAVIGATOR - SAMPLE STARTER DATA
+========================================
+Sourced from the real BUIC (Bahria University Islamabad Campus) guide map
+(Entrance-1, Entrance-2, and BUHO signboard).
+
+NOTE: distance (m from "You Are Here" at Entrance-1) and rating are
+illustrative placeholder values for the demo, since the physical map does
+not print exact figures. Swap in measured distances / real survey ratings
+for a production deployment.
+
+Format: ID, Name, Distance(m), Rating(out of 5.0)
+This same data is hardcoded in loadSampleData() inside src/Location.cpp
+----------------------------------------------------------------------------
+
+201, Bahria Business School,        180.0, 4.5
+202, Main Library,                  140.0, 4.8
+203, Fatima Girls Hostel,           220.0, 4.2
+204, Bahria Innovation Center,      200.0, 4.6
+205, Cafeteria (Pool Side),         260.0, 4.4
+206, Iqbal Block,                   250.0, 4.3
+207, Jahangir Khan Gymnasium,       340.0, 4.7
+208, Cafeteria (Parking Side),      420.0, 4.1
+209, Well Being Center,              90.0, 4.0
+210, Ibne Khuldun Auditorium,       160.0, 4.5
+211, Student Support Center,         60.0, 4.2
+212, Bank Islami,                   300.0, 3.9
+213, ATM,                           310.0, 3.8
+214, Bank Alfalah,                  320.0, 3.9
+215, Sir Syed Block,                280.0, 4.6
+216, Mosque Dar-ul-Ilm,             380.0, 4.9
+217, Quaid Block,                   430.0, 4.1
+218, Bahria University Head Office, 460.0, 4.3
+219, Parking Plaza,                 400.0, 3.7
+
+----------------------------------------------------------------------------
+CAMPUS WALKWAY CONNECTIONS (used to build the Graph for BFS reachability)
+Inferred from adjacency on the real campus map. Each pair is an
+undirected edge (a walkway connecting two locations).
+----------------------------------------------------------------------------
+202 - 201   (Main Library - Bahria Business School)
+202 - 203   (Main Library - Fatima Girls Hostel)
+201 - 204   (Bahria Business School - Bahria Innovation Center)
+204 - 205   (Bahria Innovation Center - Cafeteria Pool Side)
+205 - 206   (Cafeteria Pool Side - Iqbal Block)
+203 - 206   (Fatima Girls Hostel - Iqbal Block)
+206 - 207   (Iqbal Block - Jahangir Khan Gymnasium)
+207 - 208   (Gymnasium - Cafeteria Parking Side)
+208 - 219   (Cafeteria Parking Side - Parking Plaza)
+207 - 219   (Gymnasium - Parking Plaza)
+204 - 209   (Bahria Innovation Center - Well Being Center)
+209 - 211   (Well Being Center - Student Support Center)
+209 - 210   (Well Being Center - Ibne Khuldun Auditorium)
+210 - 215   (Ibne Khuldun Auditorium - Sir Syed Block)
+215 - 212   (Sir Syed Block - Bank Islami)
+212 - 213   (Bank Islami - ATM)
+215 - 214   (Sir Syed Block - Bank Alfalah)
+215 - 207   (Sir Syed Block - Jahangir Khan Gymnasium)
+215 - 216   (Sir Syed Block - Mosque Dar-ul-Ilm)
+216 - 217   (Mosque Dar-ul-Ilm - Quaid Block)
+217 - 218   (Quaid Block - Bahria University Head Office)
+217 - 219   (Quaid Block - Parking Plaza)
+218 - 219   (Bahria University Head Office - Parking Plaza)

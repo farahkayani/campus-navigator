@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Campus Navigator",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "-std=c++17",
+        "-Wall",
+        "-Iinclude",
+        "src/Location.cpp",
+        "src/VisitStack.cpp",
+        "src/CatalogBrowser.cpp",
+        "src/ResourceQueue.cpp",
+        "src/SearchBST.cpp",
+        "src/CampusGraph.cpp",
+        "src/SortingAlgorithms.cpp",
+        "src/Menu.cpp",
+        "src/main.cpp",
+        "-o",
+        "campus_navigator.exe"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}
