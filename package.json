@@ -1,0 +1,19 @@
+{
+  "name": "campus-navigator",
+  "version": "1.0.0",
+  "description": "Campus Navigator - A data structures demonstration project with Vercel Speed Insights",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": [
+    "campus",
+    "navigator",
+    "data-structures"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}

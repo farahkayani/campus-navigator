@@ -805,5 +805,16 @@ function renderSort(key){
    ================================================================ */
 setActive('directory');
 </script>
+
+<!-- Vercel Speed Insights -->
+<script type="module">
+  import { injectSpeedInsights } from './speed-insights.mjs';
+  
+  // Initialize Speed Insights
+  injectSpeedInsights({
+    debug: true // Enable debug logging in development
+  });
+</script>
+
 </body>
 </html>
