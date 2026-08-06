@@ -257,8 +257,8 @@
       </div>
     </div>
     <div class="topbar-stat">
-      <div class="n mono" id="statLocCount">15</div>
-      <div class="l">Locations Indexed</div>
+      <div class="n mono" id="statLocCount">0</div>
+      <div class="l">Visits Logged</div>
     </div>
   </div>
 
@@ -488,9 +488,14 @@ function renderDirectory(){
 }
 
 /* ---------------- shared: push a visit onto the stack ---------------- */
+function updateTopStat(){
+  const el = document.getElementById('statLocCount');
+  el.textContent = visitStack.length;
+  bump(el);
+}
 function visit(idx){
   visitStack.push(idx);
-  bump(document.getElementById('statLocCount'));
+  updateTopStat();
   if(activeSection==='visits') renderVisits();
 }
 
@@ -509,7 +514,7 @@ function renderVisits(){
       <div id="stackHost"></div>
     </div>`;
   document.getElementById('undoBtn').addEventListener('click', ()=>{
-    if(visitStack.length){ visitStack.pop(); renderVisits(); }
+    if(visitStack.length){ visitStack.pop(); updateTopStat(); renderVisits(); }
   });
   const wrap = document.getElementById('stackHost');
   if(!visitStack.length){
