@@ -3,36 +3,58 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Campus Navigator</title>
+<title>Chart It — BUIC Campus Navigator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1B2230;
-    --ink-soft:#242C3D;
-    --ink-soft-2:#2B3448;
-    --paper:#F2EEE2;
-    --amber:#E3A73B;
-    --amber-dim:#7A5E27;
-    --teal:#3D8577;
-    --rust:#C1552C;
-    --muted:#8D94A6;
-    --line:#333D52;
-    --radius:10px;
+    --ink:#081A33;
+    --ink-soft:#0F2A4D;
+    --ink-soft-2:#173C67;
+    --paper:#F5EEDA;
+    --amber:#E8B24A;
+    --amber-dim:#8C6A28;
+    --teal:#4FC1AE;
+    --rust:#FF7A5C;
+    --muted:#7F91B0;
+    --line:#20416B;
+    --radius:12px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--ink);
+    background:
+      radial-gradient(1100px 600px at 88% -8%, rgba(232,178,74,.10), transparent 60%),
+      radial-gradient(900px 500px at -6% 8%, rgba(79,193,174,.09), transparent 55%),
+      var(--ink);
+    background-attachment:fixed;
     color:var(--paper);
-    font-family:'Inter',sans-serif;
+    font-family:'Space Grotesk',sans-serif;
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
+    position:relative;
   }
+  /* faint chart-grid + compass-rose watermark, ambient only */
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(245,238,218,.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,238,218,.028) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(1200px 800px at 50% 0%, black, transparent 75%);
+  }
+  /* fine grain, like paper under a desk lamp */
+  body::after{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.35; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .shell{ position:relative; z-index:1; }
   ::selection{background:var(--amber);color:var(--ink);}
   a{color:inherit;}
 
-  .disp{ font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.04em; }
+  .disp{ font-family:'Bebas Neue',sans-serif; text-transform:uppercase; letter-spacing:.05em; }
   .mono{ font-family:'JetBrains Mono',monospace; }
 
   button{ font-family:inherit; cursor:pointer; }
@@ -40,9 +62,9 @@
     outline:2px solid var(--amber); outline-offset:2px;
   }
   input, select{
-    font-family:'Inter',sans-serif; font-size:14px;
+    font-family:'Space Grotesk',sans-serif; font-size:14px;
     background:var(--ink); color:var(--paper);
-    border:1px solid var(--line); border-radius:6px; padding:9px 11px;
+    border:1px solid var(--line); border-radius:7px; padding:9px 11px;
   }
 
   /* ============ SHELL ============ */
@@ -50,107 +72,164 @@
 
   .topbar{
     display:flex; align-items:center; justify-content:space-between;
-    padding-bottom:18px; margin-bottom:18px;
+    padding-bottom:20px; margin-bottom:20px;
     border-bottom:1px solid var(--line);
   }
-  .brand{ display:flex; align-items:center; gap:12px; }
-  .brand-mark{ width:34px; height:34px; flex:0 0 auto; }
-  .brand-text .word{ font-size:20px; font-weight:600; letter-spacing:.06em; line-height:1; }
-  .brand-text .tag{ font-size:11px; color:var(--muted); letter-spacing:.03em; margin-top:3px; }
-  .topbar-stat{ text-align:right; }
-  .topbar-stat .n{ font-family:'Oswald',sans-serif; font-size:26px; color:var(--amber); line-height:1; transition:transform .18s ease; }
-  .topbar-stat .l{ font-size:10px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-top:4px; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ width:42px; height:42px; flex:0 0 auto; }
+  .brand-mark .needle{ transform-origin:17px 17px; animation:spin 14s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .brand-text .word{ font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:.05em; line-height:1; color:var(--paper); }
+  .brand-text .tag{ font-size:11px; color:var(--muted); letter-spacing:.03em; margin-top:4px; }
+  .topbar-stat{
+    text-align:center; position:relative;
+    background:radial-gradient(circle at 35% 30%, #1a3a63, var(--ink-soft) 70%);
+    border:1.5px solid var(--amber-dim); border-radius:50%;
+    width:76px; height:76px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px rgba(232,178,74,.12), inset 0 1px 0 rgba(255,255,255,.06), 0 8px 18px -8px rgba(0,0,0,.6);
+  }
+  .topbar-stat::before{
+    content:""; position:absolute; inset:5px; border:1px dashed rgba(232,178,74,.35); border-radius:50%;
+  }
+  .topbar-stat .n{ font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--amber); line-height:1; transition:transform .18s ease; }
+  .topbar-stat .l{ font-size:7.5px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-top:2px; line-height:1.2; max-width:52px; }
   .stat-bump{ animation:bump .32s ease; }
   @keyframes bump{ 0%{transform:scale(1);} 35%{transform:scale(1.28);} 100%{transform:scale(1);} }
 
   /* ============ LAYOUT ============ */
-  .layout{ display:grid; grid-template-columns:190px 1fr; gap:20px; align-items:start; }
+  .layout{ display:grid; grid-template-columns:208px 1fr; gap:20px; align-items:start; }
 
-  .rail{ display:flex; flex-direction:column; gap:2px; position:sticky; top:22px; }
+  .rail{ display:flex; flex-direction:column; gap:6px; position:sticky; top:22px; }
   .rail button{
-    display:flex; align-items:center; gap:10px;
-    background:none; border:none; border-left:2px solid transparent;
-    color:var(--muted); text-align:left; padding:11px 12px;
-    font-family:'Oswald',sans-serif; font-size:13px; letter-spacing:.05em; text-transform:uppercase;
-    border-radius:0 6px 6px 0;
-    transition:background .15s ease, color .15s ease, border-color .15s ease;
+    display:flex; align-items:center; gap:11px;
+    background:var(--ink-soft); border:1px solid var(--line); border-left:3px solid transparent;
+    color:var(--muted); text-align:left; padding:11px 13px;
+    font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:.05em; text-transform:uppercase;
+    border-radius:6px;
+    transition:background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+    position:relative; overflow:hidden;
   }
-  .rail button .num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber-dim); }
-  .rail button:hover{ background:var(--ink-soft); color:var(--paper); }
-  .rail button.active{ border-left-color:var(--amber); background:var(--ink-soft); color:var(--paper); }
-  .rail button.active .num{ color:var(--amber); }
+  .rail button::after{
+    content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:rgba(8,26,51,.5); pointer-events:none;
+  }
+  .rail button .icon{ width:16px; height:16px; flex:0 0 auto; color:var(--amber-dim); transition:color .15s ease; }
+  .rail button .num{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--amber-dim); font-weight:600; position:absolute; right:10px; top:6px; opacity:.7; }
+  .rail button:hover{ background:var(--ink-soft-2); color:var(--paper); transform:translateX(2px); }
+  .rail button:hover .icon{ color:var(--amber); }
+  .rail button.active{
+    border-left-color:var(--amber); color:var(--ink); background:var(--amber);
+    box-shadow:0 6px 16px -8px rgba(232,178,74,.5);
+  }
+  .rail button.active .icon{ color:var(--ink); }
+  .rail button.active .num{ color:rgba(8,26,51,.55); }
+  .rail button.active::after{ background:rgba(8,26,51,.18); }
 
   .panel{
-    background:var(--ink-soft); border:1px solid var(--line); border-radius:var(--radius);
-    padding:26px 28px; min-height:420px;
+    background:var(--ink-soft);
+    background-image:radial-gradient(600px 260px at 100% 0%, rgba(79,193,174,.06), transparent 70%);
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px 30px; min-height:420px;
     animation:fadeIn .22s ease;
+    position:relative; overflow:hidden;
   }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
 
-  .panel-head{ margin-bottom:18px; }
-  .panel-head h1{ font-family:'Oswald',sans-serif; font-size:24px; letter-spacing:.02em; margin:0 0 6px; text-transform:uppercase; }
-  .panel-head p{ margin:0; color:var(--muted); font-size:13.5px; line-height:1.5; max-width:60ch; }
+  .panel-head{ margin-bottom:20px; }
+  .panel-head::before{ content:""; display:block; width:34px; height:3px; background:var(--amber); border-radius:2px; margin-bottom:12px; }
+  .panel-head h1{ font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:.02em; margin:0 0 7px; text-transform:uppercase; }
+  .panel-head p{ margin:0; color:var(--muted); font-size:13.5px; line-height:1.55; max-width:60ch; }
   .struct-tag{
-    display:inline-block; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:11px;
-    color:var(--teal); background:rgba(61,133,119,.12); border:1px solid rgba(61,133,119,.35);
-    padding:3px 8px; border-radius:4px; letter-spacing:.02em;
+    display:inline-block; margin-top:12px; font-family:'JetBrains Mono',monospace; font-size:11px;
+    color:var(--teal); background:rgba(79,193,174,.10); border:1px solid rgba(79,193,174,.35);
+    padding:4px 9px; border-radius:20px; letter-spacing:.02em;
   }
 
   /* ============ DIRECTORY ============ */
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+  .chip-btn{
+    display:flex; align-items:center; gap:7px;
+    background:var(--ink); border:1px solid var(--line); color:var(--muted);
+    border-radius:20px; padding:6px 13px 6px 10px; font-size:12px; font-family:'Space Grotesk',sans-serif;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .chip-btn .dot{ width:8px; height:8px; border-radius:50%; background:var(--chip); flex:0 0 auto; box-shadow:0 0 0 2px rgba(0,0,0,.25); }
+  .chip-btn:hover{ border-color:var(--chip); color:var(--paper); }
+  .chip-btn.active{ background:var(--ink-soft-2); border-color:var(--chip); color:var(--paper); font-weight:600; }
   .card-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px; margin-top:16px; }
   .loc-card{
-    background:var(--ink); border:1px solid var(--line); border-radius:8px; padding:14px 15px;
-    display:flex; flex-direction:column; gap:8px;
+    background:var(--ink); border:1px solid var(--line); border-top:3px solid var(--catcolor, var(--line));
+    border-radius:10px; padding:15px 16px;
+    display:flex; flex-direction:column; gap:9px;
+    transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;
   }
+  .loc-card:hover{ transform:translateY(-3px); box-shadow:0 10px 22px -14px rgba(0,0,0,.6); }
   .loc-card .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
   .loc-card .id{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); }
   .loc-card .name{ font-weight:600; font-size:14.5px; line-height:1.3; }
+  .loc-card .cat-chip{
+    flex:0 0 auto; font-size:9.5px; letter-spacing:.03em; text-transform:uppercase;
+    color:var(--catcolor); background:color-mix(in srgb, var(--catcolor) 16%, transparent);
+    border:1px solid color-mix(in srgb, var(--catcolor) 45%, transparent);
+    padding:3px 7px; border-radius:20px; white-space:nowrap;
+  }
   .loc-card .meta{ display:flex; gap:14px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); }
   .loc-card .meta b{ color:var(--paper); font-weight:500; }
   .mini-btn{
     background:none; border:1px solid var(--line); color:var(--paper);
-    border-radius:6px; padding:6px 10px; font-size:12px; align-self:flex-start;
-    transition:border-color .15s, color .15s;
+    border-radius:7px; padding:7px 12px; font-size:12px; align-self:flex-start;
+    transition:border-color .15s, color .15s, background .15s, transform .1s;
   }
   .mini-btn:hover{ border-color:var(--amber); color:var(--amber); }
-  .mini-btn.primary{ background:var(--amber); border-color:var(--amber); color:var(--ink); font-weight:600; }
-  .mini-btn.primary:hover{ background:#efb658; color:var(--ink); }
+  .mini-btn:active{ transform:scale(.96); }
+  .mini-btn.primary{ background:var(--amber); border-color:var(--amber); color:var(--ink); font-weight:700; }
+  .mini-btn.primary:hover{ background:#f2bf5e; color:var(--ink); }
   .mini-btn.rust{ border-color:var(--rust); color:var(--rust); }
-  .mini-btn.rust:hover{ background:var(--rust); color:var(--paper); }
+  .mini-btn.rust:hover{ background:var(--rust); color:var(--ink); }
 
   /* ============ VISITS / STACK ============ */
   .stack-list{ display:flex; flex-direction:column; gap:8px; margin-top:16px; }
   .stack-row{
     display:flex; align-items:center; gap:12px;
     background:var(--ink); border:1px solid var(--line); border-left:3px solid var(--teal);
-    border-radius:6px; padding:10px 14px;
+    border-radius:7px; padding:11px 14px;
     animation:slideIn .2s ease;
   }
   @keyframes slideIn{ from{opacity:0; transform:translateX(-6px);} to{opacity:1; transform:translateX(0);} }
-  .stack-row.top{ border-left-color:var(--amber); }
+  .stack-row.top{ border-left-color:var(--amber); box-shadow:0 0 0 1px rgba(232,178,74,.15) inset; }
   .stack-row .rank{ font-family:'JetBrains Mono',monospace; color:var(--muted); font-size:12px; width:22px; }
   .stack-row .name{ flex:1; font-size:14px; }
-  .stack-row .pill{ font-size:10px; letter-spacing:.05em; color:var(--ink); background:var(--amber); padding:2px 7px; border-radius:20px; text-transform:uppercase; font-weight:600; }
-  .empty-note{ color:var(--muted); font-size:13.5px; margin-top:16px; padding:16px; border:1px dashed var(--line); border-radius:8px; }
+  .stack-row .pill{ font-size:10px; letter-spacing:.05em; color:var(--ink); background:var(--amber); padding:2px 8px; border-radius:20px; text-transform:uppercase; font-weight:700; }
+  .empty-note{
+    color:var(--muted); font-size:13.5px; margin-top:16px; padding:26px 18px;
+    border:1px dashed var(--line); border-radius:12px; text-align:center; line-height:1.6;
+  }
+  .empty-note .glyph{ display:block; font-size:26px; margin-bottom:8px; filter:grayscale(1) brightness(1.6) sepia(.4); opacity:.75; }
 
   .action-row{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
 
   /* ============ BROWSER ============ */
   .kiosk{ margin-top:16px; display:flex; flex-direction:column; align-items:center; gap:18px; }
   .kiosk-card{
-    width:100%; max-width:420px; background:var(--ink); border:1px solid var(--line); border-radius:12px;
-    padding:28px 26px; text-align:center; position:relative;
+    width:100%; max-width:420px;
+    background:linear-gradient(160deg, var(--ink-soft-2), var(--ink) 65%);
+    border:1px solid var(--line); border-radius:14px;
+    padding:30px 26px; text-align:center; position:relative;
+    box-shadow:0 12px 30px -14px rgba(0,0,0,.55);
   }
-  .kiosk-card .pos{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); }
-  .kiosk-card .name{ font-family:'Oswald',sans-serif; font-size:26px; text-transform:uppercase; margin:10px 0 14px; letter-spacing:.02em; }
-  .kiosk-card .stats{ display:flex; justify-content:center; gap:26px; margin-top:6px; }
+  .kiosk-card::before{
+    content:"⚓"; position:absolute; top:14px; right:16px; font-size:14px; color:var(--amber-dim); opacity:.7;
+  }
+  .kiosk-card .pos{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:.08em; }
+  .kiosk-card .name{ font-family:'Bebas Neue',sans-serif; font-size:30px; text-transform:uppercase; margin:10px 0 16px; letter-spacing:.02em; }
+  .kiosk-card .stats{ display:flex; justify-content:center; gap:30px; margin-top:6px; }
   .kiosk-card .stats div{ text-align:center; }
   .kiosk-card .stats .v{ font-family:'JetBrains Mono',monospace; font-size:16px; color:var(--amber); }
   .kiosk-card .stats .l{ font-size:10px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-top:2px; }
   .kiosk-nav{ display:flex; gap:10px; align-items:center; }
   .kiosk-nav button{
     background:var(--ink); border:1px solid var(--line); color:var(--paper); border-radius:8px;
-    padding:10px 18px; font-family:'Oswald',sans-serif; font-size:13px; letter-spacing:.05em; text-transform:uppercase;
+    padding:10px 18px; font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:.05em; text-transform:uppercase;
+    transition:border-color .15s, color .15s;
   }
   .kiosk-nav button:hover:not(:disabled){ border-color:var(--amber); color:var(--amber); }
   .kiosk-nav button:disabled{ opacity:.3; cursor:not-allowed; }
@@ -159,58 +238,68 @@
   .queue-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:16px; }
   @media(max-width:720px){ .queue-wrap{ grid-template-columns:1fr; } }
   .now-serving{
-    background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:20px; text-align:center;
+    background:var(--ink); border:1px solid var(--line); border-radius:12px; padding:22px; text-align:center;
   }
   .now-serving .l{ font-size:11px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
-  .now-serving .name{ font-family:'Oswald',sans-serif; font-size:22px; margin-top:8px; text-transform:uppercase; min-height:28px; }
+  .now-serving .name{ font-family:'Bebas Neue',sans-serif; font-size:26px; margin-top:8px; text-transform:uppercase; min-height:30px; color:var(--amber); }
   .now-serving .served{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal); margin-top:10px; }
   .join-form{ display:flex; gap:8px; margin-top:14px; }
   .join-form input, .join-form select{ flex:1; }
   .ticket-list{ display:flex; flex-direction:column; gap:7px; max-height:260px; overflow-y:auto; }
   .ticket{
     display:flex; align-items:center; gap:10px; background:var(--ink); border:1px solid var(--line);
-    border-radius:6px; padding:9px 12px; font-size:13.5px;
+    border-radius:7px; padding:9px 12px; font-size:13.5px;
   }
   .ticket .n{ font-family:'JetBrains Mono',monospace; color:var(--amber); font-size:12px; }
 
   /* ============ SEARCH ============ */
   .search-form{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center; }
-  .seg{ display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
-  .seg button{ background:var(--ink); border:none; color:var(--muted); padding:9px 14px; font-size:13px; }
-  .seg button.active{ background:var(--amber); color:var(--ink); font-weight:600; }
+  .seg{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+  .seg button{ background:var(--ink); border:none; color:var(--muted); padding:9px 14px; font-size:13px; transition:background .15s,color .15s; }
+  .seg button.active{ background:var(--amber); color:var(--ink); font-weight:700; }
   .search-result{ margin-top:20px; }
   .result-card{
-    background:var(--ink); border:1px solid var(--teal); border-radius:8px; padding:18px 20px;
+    background:var(--ink); border:1px solid var(--teal); border-radius:10px; padding:18px 20px;
     display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;
+    box-shadow:0 0 0 1px rgba(79,193,174,.08) inset;
   }
-  .result-card.miss{ border-color:var(--rust); }
-  .result-card .rname{ font-weight:600; font-size:16px; }
+  .result-card.miss{ border-color:var(--rust); box-shadow:0 0 0 1px rgba(255,122,92,.08) inset; }
+  .result-card .rname{ font-weight:700; font-size:16px; }
   .result-card .rmeta{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-top:4px; }
   .comparisons-badge{ text-align:center; }
-  .comparisons-badge .v{ font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--amber); }
+  .comparisons-badge .v{ font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--amber); }
   .comparisons-badge .l{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
 
   /* ============ ROUTES ============ */
   .route-controls{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center; }
   .route-body{ display:grid; grid-template-columns:1.3fr 1fr; gap:20px; margin-top:20px; }
   @media(max-width:820px){ .route-body{ grid-template-columns:1fr; } }
-  .map-wrap{ background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px; }
+  .map-wrap{
+    background:
+      repeating-conic-gradient(from 0deg at 88% 10%, rgba(232,178,74,.055) 0deg 0.6deg, transparent 0.6deg 15deg),
+      radial-gradient(220px 220px at 88% 10%, rgba(232,178,74,.06), transparent 70%),
+      repeating-linear-gradient(0deg, rgba(127,145,176,.05) 0 1px, transparent 1px 38px),
+      repeating-linear-gradient(90deg, rgba(127,145,176,.05) 0 1px, transparent 1px 38px),
+      var(--ink);
+    border:1px solid var(--line); border-radius:12px; padding:10px;
+    position:relative;
+  }
   .map-wrap svg{ width:100%; height:auto; display:block; }
   .route-result{ display:flex; flex-direction:column; gap:12px; }
-  .route-status{ font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:15px; letter-spacing:.03em; }
+  .route-status{ font-family:'Bebas Neue',sans-serif; text-transform:uppercase; font-size:18px; letter-spacing:.03em; }
   .route-status.ok{ color:var(--teal); }
   .route-status.no{ color:var(--rust); }
   .chain{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:13.5px; }
   .chain .stop{ background:var(--ink); border:1px solid var(--line); border-radius:20px; padding:5px 12px; }
   .chain .arrow{ color:var(--amber); }
-  .edge-line{ stroke:#3B4459; stroke-width:2; }
+  .edge-line{ stroke:#28456E; stroke-width:2; stroke-dasharray:1 5; stroke-linecap:round; }
   .edge-line.hi{ stroke:var(--amber); stroke-width:3; stroke-dasharray:400; stroke-dashoffset:400; animation:draw 1s ease forwards; }
   @keyframes draw{ to{ stroke-dashoffset:0; } }
   .node-dot{ fill:var(--ink-soft-2); stroke:var(--line); stroke-width:1.5; }
   .node-dot.hi{ fill:var(--amber); stroke:var(--amber); }
-  .node-dot.endpoint{ fill:var(--teal); stroke:var(--teal); }
+  .node-dot.endpoint{ fill:var(--teal); stroke:var(--teal); stroke-width:2; }
   .node-label{ fill:var(--muted); font-family:'JetBrains Mono',monospace; font-size:8.5px; }
-  .node-label.hi{ fill:var(--paper); font-weight:600; }
+  .node-label.hi{ fill:var(--paper); font-weight:700; }
 
   /* ============ SORT ============ */
   .sort-btns{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
@@ -218,12 +307,12 @@
   .sort-list{ display:flex; flex-direction:column; gap:6px; margin-top:16px; }
   .sort-row{
     display:grid; grid-template-columns:32px 1.8fr .8fr; align-items:center; gap:12px;
-    background:var(--ink); border:1px solid var(--line); border-radius:6px; padding:9px 14px; font-size:13.5px;
+    background:var(--ink); border:1px solid var(--line); border-radius:7px; padding:9px 14px; font-size:13.5px;
     animation:slideIn .18s ease;
   }
   .sort-row .rank{ font-family:'JetBrains Mono',monospace; color:var(--amber-dim); font-size:12px; }
   .sort-row .field{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); }
-  .sort-row .field.hi{ color:var(--amber); font-weight:600; }
+  .sort-row .field.hi{ color:var(--amber); font-weight:700; }
   .sort-head{
     display:grid; grid-template-columns:32px 1.8fr .8fr; gap:12px; padding:0 14px;
     font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:18px;
@@ -235,6 +324,7 @@
     .rail button{ flex:0 0 auto; border-left:none; border-bottom:2px solid transparent; border-radius:6px 6px 0 0; white-space:nowrap; }
     .rail button.active{ border-bottom-color:var(--amber); }
     .panel{ padding:20px 18px; }
+    .panel-head h1{ font-size:26px; }
   }
 
   @media(prefers-reduced-motion:reduce){
@@ -248,17 +338,24 @@
   <div class="topbar">
     <div class="brand">
       <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
-        <circle cx="17" cy="17" r="15.5" stroke="#E3A73B" stroke-width="1.5"/>
-        <path d="M17 4 L20 15 L31 17 L20 19 L17 30 L14 19 L3 17 L14 15 Z" fill="#E3A73B" opacity="0.9"/>
+        <circle cx="17" cy="17" r="15.5" stroke="#E8B24A" stroke-width="1.5"/>
+        <circle cx="17" cy="17" r="11" stroke="#20416B" stroke-width="1"/>
+        <text x="17" y="6.5" text-anchor="middle" fill="#7F91B0" font-size="4" font-family="JetBrains Mono, monospace">N</text>
+        <text x="17" y="30.5" text-anchor="middle" fill="#7F91B0" font-size="4" font-family="JetBrains Mono, monospace">S</text>
+        <g class="needle">
+          <path d="M17 6 L20 17 L17 28 L14 17 Z" fill="#E8B24A" opacity="0.95"/>
+          <path d="M17 6 L20 17 L17 17 Z" fill="#F5EEDA" opacity="0.55"/>
+        </g>
+        <circle cx="17" cy="17" r="1.6" fill="#0F2A4D" stroke="#E8B24A" stroke-width="1"/>
       </svg>
       <div class="brand-text">
-        <div class="word disp">Campus Navigator</div>
-        <div class="tag mono">Bahria University Islamabad · Wayfinding Console</div>
+        <div class="word disp">Chart It</div>
+        <div class="tag mono">Bahria University Islamabad · Your Campus, Mapped</div>
       </div>
     </div>
     <div class="topbar-stat">
       <div class="n mono" id="statLocCount">0</div>
-      <div class="l">Visits Logged</div>
+      <div class="l">Places Explored</div>
     </div>
   </div>
 
@@ -312,6 +409,33 @@ const LABELS = {
   // 18: "New Name For BUHO",
 };
 function dname(l){ return LABELS[l.id] || l.name; }
+
+/* ================================================================
+   CATEGORY TAGGING — cosmetic only, derived from each name at
+   render time. Doesn't touch `locations`, so search/sort/routes/
+   stack/queue all keep working off the original data untouched.
+   ================================================================ */
+const CATEGORIES = {
+  academic:  {label:'Academic',      color:'#4FC1AE'},
+  food:      {label:'Food & Drink',  color:'#FF7A5C'},
+  finance:   {label:'Banking',       color:'#8FB3E8'},
+  student:   {label:'Student Life',  color:'#E8B24A'},
+  faith:     {label:'Mosque',        color:'#C9A6F0'},
+  admin:     {label:'Admin',         color:'#F5EEDA'},
+  parking:   {label:'Parking',       color:'#7F91B0'},
+  residence: {label:'Residence',     color:'#F0A6C9'},
+};
+function categoryOf(l){
+  const n = l.name.toLowerCase();
+  if(n.includes('cafe')) return 'food';
+  if(n.includes('bank') || n.includes('atm')) return 'finance';
+  if(n.includes('mosque')) return 'faith';
+  if(n.includes('parking')) return 'parking';
+  if(n.includes('hostel')) return 'residence';
+  if(n.includes('head office')) return 'admin';
+  if(n.includes('gymnasium') || n.includes('auditorium') || n.includes('well being') || n.includes('support center')) return 'student';
+  return 'academic';
+}
 const edgeDefs = [
   [2,1],[2,3],[1,4],[4,5],[5,6],[3,6],[6,7],
   [7,8],[8,19],[7,19],[4,9],[9,11],[9,10],[10,15],
@@ -423,14 +547,23 @@ function mergeSortByDistanceDesc(idx){
 /* ================================================================
    NAVIGATION SHELL
    ================================================================ */
+const ICONS = {
+  directory: '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1"/><rect x="9" y="9" width="5.5" height="5.5" rx="1"/></svg>',
+  visits:    '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="2" y1="3" x2="14" y2="3"/><line x1="2" y1="8" x2="11" y2="8"/><line x1="2" y1="13" x2="8" y2="13"/></svg>',
+  browse:    '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2" width="8" height="11" rx="1"/><path d="M10.5 4.5 13.5 5.3 11 13 8.2 12.2" stroke-linecap="round"/></svg>',
+  queue:     '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="3" cy="8" r="1.6"/><circle cx="8" cy="8" r="1.6"/><circle cx="13" cy="8" r="1.6" stroke-dasharray="2 2"/></svg>',
+  search:    '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6.8" cy="6.8" r="4.3"/><line x1="10" y1="10" x2="14" y2="14" stroke-linecap="round"/></svg>',
+  routes:    '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="3" cy="12.5" r="1.7"/><circle cx="13" cy="3.5" r="1.7"/><path d="M4.5 11 8 7.5 8 5 10.5 5" stroke-linecap="round" stroke-dasharray="1.6 1.8"/></svg>',
+  sort:      '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="2" y1="13" x2="2" y2="9"/><line x1="6.5" y1="13" x2="6.5" y2="5"/><line x1="11" y1="13" x2="11" y2="2"/></svg>',
+};
 const SECTIONS = [
-  {key:'directory', num:'01', label:'Directory'},
-  {key:'visits',    num:'02', label:'My Visits'},
-  {key:'browse',    num:'03', label:'Browse'},
-  {key:'queue',     num:'04', label:'Queue'},
-  {key:'search',    num:'05', label:'Search'},
-  {key:'routes',    num:'06', label:'Routes'},
-  {key:'sort',      num:'07', label:'Sort'},
+  {key:'directory', num:'01', label:'Explore'},
+  {key:'visits',    num:'02', label:'My Trail'},
+  {key:'browse',    num:'03', label:'Flip Through'},
+  {key:'queue',     num:'04', label:'Line Up'},
+  {key:'search',    num:'05', label:'Find It'},
+  {key:'routes',    num:'06', label:'Plot a Route'},
+  {key:'sort',      num:'07', label:'Rank It'},
 ];
 let activeSection = 'directory';
 
@@ -438,7 +571,7 @@ const rail = document.getElementById('rail');
 SECTIONS.forEach(s=>{
   const btn = document.createElement('button');
   btn.role='tab'; btn.id='tab-'+s.key;
-  btn.innerHTML = `<span class="num mono">${s.num}</span><span>${s.label}</span>`;
+  btn.innerHTML = `${ICONS[s.key]}<span>${s.label}</span><span class="num mono">${s.num}</span>`;
   btn.addEventListener('click', ()=>setActive(s.key));
   rail.appendChild(btn);
 });
@@ -462,29 +595,51 @@ function render(){
 }
 
 /* ---------------- 01 DIRECTORY ---------------- */
+let dirFilter = 'all';
 function renderDirectory(){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Location Directory</h1>
-        <p>Every campus location lives in one fixed-size catalog. Every other feature — the visit log, the queue, the search trees, the route graph — refers back to an entry here by index.</p>
-        <span class="struct-tag">Array · Location[15]</span>
+        <h1>The Campus Atlas</h1>
+        <p>Every building, block, and hangout spot on BUIC's campus, in one place. New here? Start scrolling — tap "Mark visited" as you find your way around, and it'll show up on your trail.</p>
+        <span class="struct-tag">Array · Location[${locations.length}]</span>
       </div>
+      <div class="filter-row" id="filterRow"></div>
       <div class="card-grid" id="dirGrid"></div>
     </div>`;
+  const filterRow = document.getElementById('filterRow');
+  const counts = {};
+  locations.forEach(l=>{ const c=categoryOf(l); counts[c]=(counts[c]||0)+1; });
+  const chips = [{key:'all', label:'All Spots', color:'var(--paper)'}, ...Object.entries(CATEGORIES).filter(([k])=>counts[k]).map(([k,v])=>({key:k, label:v.label, color:v.color}))];
+  chips.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'chip-btn' + (dirFilter===c.key ? ' active':'');
+    b.style.setProperty('--chip', c.color);
+    b.innerHTML = `<span class="dot"></span>${c.label}`;
+    b.addEventListener('click', ()=>{ dirFilter=c.key; renderDirectory(); });
+    filterRow.appendChild(b);
+  });
   const grid = document.getElementById('dirGrid');
   locations.forEach((l,i)=>{
+    const cat = categoryOf(l);
+    if(dirFilter!=='all' && cat!==dirFilter) return;
+    const catDef = CATEGORIES[cat];
     const card = document.createElement('div');
     card.className='loc-card';
+    card.style.setProperty('--catcolor', catDef.color);
     card.innerHTML = `
       <div class="top-row">
         <div><div class="id mono">#${l.id}</div><div class="name">${dname(l)}</div></div>
+        <span class="cat-chip" style="--catcolor:${catDef.color}">${catDef.label}</span>
       </div>
       <div class="meta"><span>Dist <b>${fmtDist(l.distance)}</b></span></div>
       <button class="mini-btn">Mark visited</button>`;
     card.querySelector('button').addEventListener('click', ()=>{ visit(i); });
     grid.appendChild(card);
   });
+  if(!grid.children.length){
+    grid.innerHTML = `<div class="empty-note" style="grid-column:1/-1;"><span class="glyph">🗺</span>No spots in this category yet.</div>`;
+  }
 }
 
 /* ---------------- shared: push a visit onto the stack ---------------- */
@@ -504,8 +659,8 @@ function renderVisits(){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Recent Visits</h1>
-        <p>Every location you mark as visited is pushed onto a stack, so the most recent stop always shows first. Undo pops it straight back off.</p>
+        <h1>Your Trail</h1>
+        <p>Every stop you mark gets pinned to your trail, newest on top — like a running log of your first week on campus. Took a wrong turn? Undo pops the last one straight back off.</p>
         <span class="struct-tag">Stack · LIFO</span>
       </div>
       <div class="action-row">
@@ -518,7 +673,7 @@ function renderVisits(){
   });
   const wrap = document.getElementById('stackHost');
   if(!visitStack.length){
-    wrap.innerHTML = `<div class="empty-note">No visits logged yet — mark a location from the Directory or Search tab to get started.</div>`;
+    wrap.innerHTML = `<div class="empty-note"><span class="glyph">⚓</span>Your trail is empty — mark a spot from Explore or Find It to start charting your first week.</div>`;
     return;
   }
   const list = document.createElement('div');
@@ -542,8 +697,8 @@ function renderBrowse(){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Catalog Browser</h1>
-        <p>Page through every location one at a time, like flipping through a campus directory board.</p>
+        <h1>Flip Through Campus</h1>
+        <p>One stop at a time, like flipping cue cards at the orientation desk. Handy for a slow first look before you know where anything is.</p>
         <span class="struct-tag">Array + Index Pointer</span>
       </div>
       <div class="kiosk">
@@ -572,8 +727,8 @@ function renderQueue(){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Busy Resource Queue</h1>
-        <p>A live first-come-first-served simulation — pick a campus site to join its waiting line. Only real, recognized sites can be queued (no free-text entries).</p>
+        <h1>Line Up</h1>
+        <p>Simulates a first-come-first-served line at any campus counter — cafe, bank, front desk. Pick a real site below and watch the queue move.</p>
         <span class="struct-tag">Queue · FCFS</span>
       </div>
       <div class="queue-wrap">
@@ -619,7 +774,7 @@ function renderQueue(){
   });
   const list = document.getElementById('ticketList');
   if(!queue.length){
-    list.innerHTML = `<div class="empty-note">Queue is empty.</div>`;
+    list.innerHTML = `<div class="empty-note"><span class="glyph">⛴</span>Queue is empty.</div>`;
   } else {
     queue.forEach((p,i)=>{
       const t=document.createElement('div'); t.className='ticket';
@@ -637,8 +792,8 @@ function renderSearch(mode){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Search Locations</h1>
-        <p>Two binary search trees — one keyed by ID, one keyed by name — cut the search down from a full scan to a handful of comparisons.</p>
+        <h1>Find It Fast</h1>
+        <p>Know the name or the ID? Either works — a search tree behind the scenes finds it in a handful of comparisons instead of scanning the whole campus.</p>
         <span class="struct-tag">Binary Search Tree</span>
       </div>
       <div class="search-form">
@@ -706,8 +861,8 @@ function renderRoutes(){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Route Finder</h1>
-        <p>Campus walkways form a graph. Breadth-first search checks whether two locations are connected — and if so, traces the shortest hop path between them.</p>
+        <h1>Plot a Route</h1>
+        <p>Pick a start and a destination and watch the shortest walking path light up on the chart — every campus walkway is mapped underneath.</p>
         <span class="struct-tag">Graph · BFS</span>
       </div>
       <div class="route-controls">
@@ -735,18 +890,18 @@ function renderRoutes(){
     const start = Number(fromSel.value), end = Number(toSel.value);
     const resultBox = document.getElementById('routeResult');
     if(start===end){
-      resultBox.innerHTML = `<div class="route-status no">Pick two different locations.</div>`;
+      resultBox.innerHTML = `<div class="route-status no">Pick two different spots to plot a route.</div>`;
       drawMap([]);
       return;
     }
     const path = bfsPath(start,end);
     if(!path){
-      resultBox.innerHTML = `<div class="route-status no">✕ No route exists</div>
-        <p style="color:var(--muted); font-size:13.5px; margin:0;">These two locations aren't connected by any recorded campus walkway.</p>`;
+      resultBox.innerHTML = `<div class="route-status no">✕ No route charted</div>
+        <p style="color:var(--muted); font-size:13.5px; margin:0;">These two spots aren't connected by any recorded campus walkway.</p>`;
       drawMap([]);
     } else {
       const names = path.map(id=>dname(locations[idxById(id)]));
-      resultBox.innerHTML = `<div class="route-status ok">✓ Route found — ${path.length} stops</div>
+      resultBox.innerHTML = `<div class="route-status ok">✓ Route charted — ${path.length} stops</div>
         <div class="chain">${names.map((n,i)=> (i>0?'<span class="arrow">→</span>':'') + `<span class="stop">${n}</span>`).join('')}</div>`;
       drawMap(path);
     }
@@ -784,12 +939,12 @@ function renderSort(key){
   host.innerHTML = `
     <div class="panel">
       <div class="panel-head">
-        <h1>Sort Locations</h1>
-        <p>Four classic algorithms, each paired with the field it sorts best — from simple quadratic sorts to merge sort's O(n log n) sweep.</p>
+        <h1>Rank the Campus</h1>
+        <p>Four classic sorting algorithms, each paired with the field it sorts best — from simple A-to-Z sweeps to merge sort's faster O(n log n) pass.</p>
         <span class="struct-tag">Bubble · Selection · Insertion · Merge</span>
       </div>
       <div class="sort-btns" id="sortBtns"></div>
-      <div class="sort-caption mono" id="sortCaption">${key ? '' : 'Choose an algorithm to sort the catalog.'}</div>
+      <div class="sort-caption mono" id="sortCaption">${key ? '' : 'Pick an algorithm to rank every stop on campus.'}</div>
       <div id="sortListHost"></div>
     </div>`;
   const btnHost = document.getElementById('sortBtns');
