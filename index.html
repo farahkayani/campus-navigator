@@ -165,7 +165,7 @@
   .now-serving .name{ font-family:'Oswald',sans-serif; font-size:22px; margin-top:8px; text-transform:uppercase; min-height:28px; }
   .now-serving .served{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal); margin-top:10px; }
   .join-form{ display:flex; gap:8px; margin-top:14px; }
-  .join-form input{ flex:1; }
+  .join-form input, .join-form select{ flex:1; }
   .ticket-list{ display:flex; flex-direction:column; gap:7px; max-height:260px; overflow-y:auto; }
   .ticket{
     display:flex; align-items:center; gap:10px; background:var(--ink); border:1px solid var(--line);
@@ -298,6 +298,20 @@ const locations = [
   {id:218, name:"Bahria University Head Office", distance:460, rating:4.3, x:580,y:420},
   {id:219, name:"Parking Plaza",                 distance:400, rating:3.7, x:615,y:260},
 ];
+
+/* ================================================================
+   DISPLAY LABELS — rename anything shown on screen from HERE ONLY.
+   Do not edit the `locations` array above to rename something —
+   everything else in the code (search, sort, graph, IDs) keeps
+   working off the original `name` field. Just add/edit a line
+   below: <location id>: "New Name Shown In UI".
+   Leave this object empty ({}) to show the original names.
+   ================================================================ */
+const LABELS = {
+  205: "Crispino Cafe",
+  208: "Bite and Beans Cafe",
+};
+function dname(l){ return LABELS[l.id] || l.name; }
 const edgeDefs = [
   [202,201],[202,203],[201,204],[204,205],[205,206],[203,206],[206,207],
   [207,208],[208,219],[207,219],[204,209],[209,211],[209,210],[210,215],
@@ -344,7 +358,7 @@ function searchBy(root, key, keyFn, state){
 let idRoot = null, nameRoot = null;
 locations.forEach((l,i)=>{
   idRoot   = insertBy(idRoot, i, x => x.id);
-  nameRoot = insertBy(nameRoot, i, x => x.name);
+  nameRoot = insertBy(nameRoot, i, x => dname(x));
 });
 
 /* ================================================================
@@ -374,14 +388,14 @@ function bubbleSortByName(idx){
   idx=[...idx];
   for(let i=0;i<idx.length-1;i++)
     for(let j=0;j<idx.length-1-i;j++)
-      if(locations[idx[j]].name > locations[idx[j+1]].name){ const t=idx[j];idx[j]=idx[j+1];idx[j+1]=t; }
+      if(dname(locations[idx[j]]) > dname(locations[idx[j+1]])){ const t=idx[j];idx[j]=idx[j+1];idx[j+1]=t; }
   return idx;
 }
 function selectionSortByNameDesc(idx){
   idx=[...idx];
   for(let i=0;i<idx.length-1;i++){
     let maxPos=i;
-    for(let j=i+1;j<idx.length;j++) if(locations[idx[j]].name > locations[idx[maxPos]].name) maxPos=j;
+    for(let j=i+1;j<idx.length;j++) if(dname(locations[idx[j]]) > dname(locations[idx[maxPos]])) maxPos=j;
     const t=idx[i]; idx[i]=idx[maxPos]; idx[maxPos]=t;
   }
   return idx;
@@ -464,7 +478,7 @@ function renderDirectory(){
     card.className='loc-card';
     card.innerHTML = `
       <div class="top-row">
-        <div><div class="id mono">#${l.id}</div><div class="name">${l.name}</div></div>
+        <div><div class="id mono">#${l.id}</div><div class="name">${dname(l)}</div></div>
       </div>
       <div class="meta"><span>Dist <b>${fmtDist(l.distance)}</b></span><span>Rating <b>${l.rating}/5</b></span></div>
       <button class="mini-btn">Mark visited</button>`;
@@ -510,7 +524,7 @@ function renderVisits(){
     const row = document.createElement('div');
     row.className = 'stack-row' + (rank===1 ? ' top':'');
     row.innerHTML = `<span class="rank mono">${String(rank).padStart(2,'0')}</span>
-      <span class="name">${l.name}</span>
+      <span class="name">${dname(l)}</span>
       ${rank===1 ? '<span class="pill">Most recent</span>' : ''}`;
     list.appendChild(row);
   }
@@ -530,7 +544,7 @@ function renderBrowse(){
       <div class="kiosk">
         <div class="kiosk-card">
           <div class="pos mono">${String(browseIndex+1).padStart(2,'0')} / ${locations.length}</div>
-          <div class="name">${l.name}</div>
+          <div class="name">${dname(l)}</div>
           <div class="stats">
             <div><div class="v">${fmtDist(l.distance)}</div><div class="l">Distance</div></div>
             <div><div class="v">${l.rating}/5</div><div class="l">Rating</div></div>
@@ -555,7 +569,7 @@ function renderQueue(){
     <div class="panel">
       <div class="panel-head">
         <h1>Busy Resource Queue</h1>
-        <p>A live first-come-first-served simulation for a busy shared resource — the Library Front Desk.</p>
+        <p>A live first-come-first-served simulation — pick a campus site to join its waiting line. Only real, recognized sites can be queued (no free-text entries).</p>
         <span class="struct-tag">Queue · FCFS</span>
       </div>
       <div class="queue-wrap">
@@ -566,7 +580,10 @@ function renderQueue(){
             <div class="served mono" id="servedCount">Total served: ${totalServed}</div>
           </div>
           <form class="join-form" id="joinForm">
-            <input type="text" id="joinName" placeholder="Enter name" required />
+            <select id="joinName" required>
+              <option value="" disabled selected>Select a site…</option>
+              ${locations.map(l => `<option value="${dname(l)}">${dname(l)}</option>`).join('')}
+            </select>
             <button type="submit" class="mini-btn primary">Join queue</button>
           </form>
           <div class="action-row">
@@ -581,11 +598,12 @@ function renderQueue(){
     </div>`;
   document.getElementById('joinForm').addEventListener('submit', e=>{
     e.preventDefault();
-    const input = document.getElementById('joinName');
-    const name = input.value.trim();
-    if(!name) return;
+    const select = document.getElementById('joinName');
+    const name = select.value;
+    // guard: only accept a value that is actually one of the campus sites
+    const isValidSite = locations.some(l => dname(l) === name);
+    if(!name || !isValidSite) return;
     queue.push({name});
-    input.value='';
     renderQueue();
   });
   document.getElementById('serveBtn').addEventListener('click', ()=>{
@@ -628,7 +646,7 @@ function renderSearch(mode){
           ${mode==='id'
             ? `<input type="number" id="searchInput" placeholder="e.g. 113" required />`
             : `<input list="nameOptions" id="searchInput" placeholder="e.g. Main Library" required />
-               <datalist id="nameOptions">${locations.map(l=>`<option value="${l.name}">`).join('')}</datalist>`}
+               <datalist id="nameOptions">${locations.map(l=>`<option value="${dname(l)}">`).join('')}</datalist>`}
           <button type="submit" class="mini-btn primary">Search</button>
         </form>
       </div>
@@ -643,7 +661,7 @@ function renderSearch(mode){
     const state = {comparisons:0};
     let found;
     if(mode==='id') found = searchBy(idRoot, Number(val), x=>x.id, state);
-    else found = searchBy(nameRoot, val, x=>x.name, state);
+    else found = searchBy(nameRoot, val, x=>dname(x), state);
     lastSearchResult = {found, state, val, mode};
     showSearchResult();
   });
@@ -657,7 +675,7 @@ function showSearchResult(){
     box.innerHTML = `
       <div class="result-card">
         <div>
-          <div class="rname">${l.name}</div>
+          <div class="rname">${dname(l)}</div>
           <div class="rmeta">ID #${l.id} · ${fmtDist(l.distance)} · ${l.rating}/5</div>
         </div>
         <div class="comparisons-badge">
@@ -704,8 +722,8 @@ function renderRoutes(){
   const fromSel = document.getElementById('fromSel');
   const toSel = document.getElementById('toSel');
   locations.forEach(l=>{
-    fromSel.innerHTML += `<option value="${l.id}">${l.name}</option>`;
-    toSel.innerHTML += `<option value="${l.id}">${l.name}</option>`;
+    fromSel.innerHTML += `<option value="${l.id}">${dname(l)}</option>`;
+    toSel.innerHTML += `<option value="${l.id}">${dname(l)}</option>`;
   });
   fromSel.value = 202; toSel.value = 218;
   drawMap([]);
@@ -723,7 +741,7 @@ function renderRoutes(){
         <p style="color:var(--muted); font-size:13.5px; margin:0;">These two locations aren't connected by any recorded campus walkway.</p>`;
       drawMap([]);
     } else {
-      const names = path.map(id=>locations[idxById(id)].name);
+      const names = path.map(id=>dname(locations[idxById(id)]));
       resultBox.innerHTML = `<div class="route-status ok">✓ Route found — ${path.length} stops</div>
         <div class="chain">${names.map((n,i)=> (i>0?'<span class="arrow">→</span>':'') + `<span class="stop">${n}</span>`).join('')}</div>`;
       drawMap(path);
@@ -745,7 +763,7 @@ function drawMap(highlightPath){
     const hi = hiSet.has(l.id);
     const isEndpoint = highlightPath.length && (l.id===highlightPath[0] || l.id===highlightPath[highlightPath.length-1]);
     s += `<circle class="node-dot ${isEndpoint?'endpoint':(hi?'hi':'')}" cx="${l.x}" cy="${l.y}" r="7"/>`;
-    s += `<text class="node-label ${hi?'hi':''}" x="${l.x}" y="${l.y-11}" text-anchor="middle">${l.name}</text>`;
+    s += `<text class="node-label ${hi?'hi':''}" x="${l.x}" y="${l.y-11}" text-anchor="middle">${dname(l)}</text>`;
   });
   svg.innerHTML = s;
 }
@@ -792,7 +810,7 @@ function renderSort(key){
     row.className='sort-row';
     row.innerHTML = `
       <span class="rank mono">${String(i+1).padStart(2,'0')}</span>
-      <span>${l.name}</span>
+      <span>${dname(l)}</span>
       <span class="field mono ${def.field==='distance'?'hi':''}">${fmtDist(l.distance)}</span>
       <span class="field mono ${def.field==='rating'?'hi':''}">${l.rating}/5</span>`;
     list.appendChild(row);
